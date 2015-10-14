@@ -85,9 +85,11 @@ public class StackTraceUtil {
 				return;
 			}else{
 				currentMethods = getAllMethodIdentifier();
-				//取交集
+				
+		/*		//取交集
 				currentResult.addAll(preMethods);
-				currentResult.retainAll(currentMethods);
+				currentResult.retainAll(currentMethods);*/
+				currentResult = getCurrentResult(preMethods, currentMethods);
 				//将这次得到的慢方法加入到result
 			    result.addAll(currentResult);
 				
@@ -108,11 +110,13 @@ public class StackTraceUtil {
 			removeDuplicate();
 			
 			if(result != null && result.size() > 0){
-				System.out.println("the slow method is:");
+				System.out.println("the slow position is:");
 				
 				Iterator<String> iterator = result.iterator();
 				while(iterator.hasNext()){
-					System.out.println(iterator.next());
+					String elem = iterator.next();
+					String[] elems = elem.split("#");
+					System.out.println(elems[0] + " ( " + elems[1] +  " )");
 				}
 				System.out.println("\n\n");
 			}	
@@ -135,6 +139,9 @@ public class StackTraceUtil {
 						methodIdentifier = threadName + ":" + methodIdentifier;
 						//增加调用关系
 						methodIdentifier = addCallRelation(methodIdentifier, i, stackTraceElems);
+						//增加行信息test
+						methodIdentifier = methodIdentifier + "#" + stackTraceElems[i].getLineNumber();
+						
 						methodIdentifierSet.add(methodIdentifier);
 					}
 				}
@@ -162,6 +169,24 @@ public class StackTraceUtil {
 			return methodIdentifier;
 		}
 		
+		public static Set<String> getCurrentResult(Set<String> preElems, Set<String> currentElems){
+			HashSet<String> tempResult = new HashSet<String>();
+			
+			for(String preElem : preElems){
+				for(String currentElem : currentElems){
+					if(preElem.startsWith(currentElem)){
+						String preElemLine = preElem.substring(preElem.indexOf("#") + 1);
+						String currentElemLine = currentElem.substring(currentElem.indexOf("#") + 1);
+						if(! preElemLine.equals(currentElemLine)){
+							preElem = preElem + "," + currentElem.substring(currentElem.indexOf("#") + 1);
+						}
+						tempResult.add(preElem);
+					}
+				}
+			}
+			return tempResult;
+		}
+		
 		public void printSetElem(Set<String> set){
 			if(set.size() > 0){
 				System.out.println("输出result:");
@@ -173,5 +198,4 @@ public class StackTraceUtil {
 		}
 	}
 }
-
 
