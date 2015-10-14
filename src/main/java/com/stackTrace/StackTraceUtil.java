@@ -8,11 +8,11 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 public class StackTraceUtil {
-	private static final int PERIOD = 100;
+	private static final int PERIOD = 30;
 	
 	private static final int DELAY = 0;
 	
-	private static final int INTERVAL_NUMBER = 1;
+	private static final int INTERVAL_NUMBER = 100;
 	
 	private static Set<String> preMethods  = null;
 	
@@ -92,8 +92,7 @@ public class StackTraceUtil {
 				//将这次得到的慢方法加入到result
 			    result.addAll(currentResult);
 				
-			    preMethods = currentMethods;
-			    
+			    preMethods = currentMethods;			    
 				currentMethods = null;
 				
 				currentResult.clear();
