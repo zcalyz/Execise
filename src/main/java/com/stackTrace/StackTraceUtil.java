@@ -8,11 +8,11 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 public class StackTraceUtil {
-	private static final int PERIOD = 20;
+	private static final int PERIOD = 100;
 	
 	private static final int DELAY = 0;
 	
-	private static final int INTERVAL_NUMBER = 100;
+	private static final int INTERVAL_NUMBER = 1;
 	
 	private static Set<String> preMethods  = null;
 	
@@ -85,7 +85,6 @@ public class StackTraceUtil {
 				return;
 			}else{
 				currentMethods = getAllMethodIdentifier();
-				
 		/*		//取交集
 				currentResult.addAll(preMethods);
 				currentResult.retainAll(currentMethods);*/
@@ -93,15 +92,17 @@ public class StackTraceUtil {
 				//将这次得到的慢方法加入到result
 			    result.addAll(currentResult);
 				
+			    preMethods = currentMethods;
+			    
 				currentMethods = null;
-				preMethods = currentMethods;
+				
 				currentResult.clear();
 				//每隔一段时间输出执行慢的方法
-				if(count++ == INTERVAL_NUMBER){
+				if(++count == INTERVAL_NUMBER){
 					showSlowMethod();
 					result.clear();
 					count = 0;
-				}	
+				}
 			}	
 		}
 		
@@ -116,7 +117,7 @@ public class StackTraceUtil {
 				while(iterator.hasNext()){
 					String elem = iterator.next();
 					String[] elems = elem.split("#");
-					System.out.println(elems[0] + " ( " + elems[1] +  " )");
+					System.out.println(elems[0] + " [ " + elems[1] +  " ]");
 				}
 				System.out.println("\n\n");
 			}	
@@ -174,11 +175,12 @@ public class StackTraceUtil {
 			
 			for(String preElem : preElems){
 				for(String currentElem : currentElems){
-					if(preElem.startsWith(currentElem)){
+					String methodPart = currentElem.substring(0,currentElem.indexOf("#")); 
+					if(preElem.startsWith(methodPart)){
 						String preElemLine = preElem.substring(preElem.indexOf("#") + 1);
 						String currentElemLine = currentElem.substring(currentElem.indexOf("#") + 1);
 						if(! preElemLine.equals(currentElemLine)){
-							preElem = preElem + "," + currentElem.substring(currentElem.indexOf("#") + 1);
+							preElem = preElem + "," + currentElemLine;
 						}
 						tempResult.add(preElem);
 					}
