@@ -27,7 +27,7 @@ public class StackTraceUtil {
 	private static int  count = 0;
 	
 	static{
-		ignoreSet.add("org.vlis.apm.start.StackTraceUtil");
+		ignoreSet.add("com.stackTrace.StackTraceUtil");
 	
 		ignoreSet.add("org.apache");
 		ignoreSet.add("java");
