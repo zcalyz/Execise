@@ -27,7 +27,7 @@ public class StackTraceUtil {
 	private static int  count = 0;
 	
 	static{
-		ignoreSet.add("com.stackTrace.StackTraceUtil");
+		ignoreSet.add("org.vlis.apm.start.StackTraceUtil");
 	
 		ignoreSet.add("org.apache");
 		ignoreSet.add("java");
@@ -36,6 +36,9 @@ public class StackTraceUtil {
 		ignoreSet.add("com.sun");
 		ignoreSet.add("org.springframework");
 		ignoreSet.add("org.mybatis");
+		ignoreSet.add("com.mchange.v2");
+		ignoreSet.add("com.mysql.jdbc");
+		ignoreSet.add("ov.org.objectweb.asm");
 	}
 	
 	public static boolean isIgnoreMethod(String methodIdentifier){
@@ -101,7 +104,7 @@ public class StackTraceUtil {
 				for(int i = 0; i < stackTraceElems.length; i++){
 					String methodIdentifier = stackTraceElems[i].getClassName() + "." + stackTraceElems[i].getMethodName();
 					
-					if(!isIgnoreMethod(methodIdentifier)){
+					if(!isIgnoreMethod(methodIdentifier) && stackTraceElems[i].getLineNumber() > 0){
 						//增加调用关系
 						methodIdentifier = addCallRelation(methodIdentifier, i, stackTraceElems);
 						//增加行信息test
@@ -134,12 +137,12 @@ public class StackTraceUtil {
 			
 			for(String preElem : preElems){
 				for(String currentElem : currentElems){
-					String currentMethodPart = currentElem.substring(0,currentElem.indexOf("#")); 
-					String preMethodPart = preElem.substring(0, preElem.indexOf("#"));
+					String currentMethodPart = currentElem.substring(0,currentElem.lastIndexOf("#")); 
+					String preMethodPart = preElem.substring(0, preElem.lastIndexOf("#"));
 					
 					if(preMethodPart.equals(currentMethodPart)){
-						String preElemLine = preElem.substring(preElem.indexOf("#") + 1);
-						String currentElemLine = currentElem.substring(currentElem.indexOf("#") + 1);
+						String preElemLine = preElem.substring(preElem.lastIndexOf("#") + 1);
+						String currentElemLine = currentElem.substring(currentElem.lastIndexOf("#") + 1);
 						
 						if(! preElemLine.equals(currentElemLine)){
 							preElem = preElem + "," + currentElemLine;
@@ -154,7 +157,7 @@ public class StackTraceUtil {
 		public void showSlowMethod() {
 			printSetElem(result);
 			removeDuplicate();
-
+			
 			if (result != null && result.size() > 0) {
 				System.out.println("the slow position is:");
 
@@ -163,8 +166,9 @@ public class StackTraceUtil {
 					String elem = iterator.next();
 					String[] elems = elem.split("#");
 					
-					if(elems != null && elems.length > 1)
+					if(elems != null && elems.length > 1){
 						System.out.println(elems[0] + " [ " + elems[1] + " ]");
+					}				
 				}
 				System.out.println("\n\n");
 			}
