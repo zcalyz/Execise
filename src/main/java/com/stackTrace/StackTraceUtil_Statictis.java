@@ -1,11 +1,14 @@
 package com.stackTrace;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
+import java.util.ListIterator;
 import java.util.Map;
 import java.util.Set;
 import java.util.Timer;
@@ -158,9 +161,8 @@ public class StackTraceUtil_Statictis {
 		}
 		
 		public static ArrayList<Entry<String, Integer>> sortByValue(){
-			ArrayList<Entry<String, Integer>> resultList = new ArrayList<Map.Entry<String, Integer>>(resultMap.entrySet());
-			
-			Collections.sort(resultList, new Comparator<Map.Entry<String, Integer>>() {
+			ArrayList<Entry<String, Integer>> resultList = new ArrayList<Map.Entry<String, Integer>>(resultMap.entrySet());		
+			/*Collections.sort(resultList, new Comparator<Map.Entry<String, Integer>>() {
 
 				@Override
 				public int compare(Entry<String, Integer> o1,
@@ -169,8 +171,49 @@ public class StackTraceUtil_Statictis {
 					return (o2.getValue() - o1.getValue());
 				}
 				
-			});		
+			});		*/
+			mapQuickSort(resultList, 0, resultList.size() - 1);
 			return resultList;
+		}
+		
+		public static void mapQuickSort(ArrayList<Entry<String, Integer>> resultList,int start,int end){
+			if(start < end){
+				int partition = partition(resultList, start, end);
+				mapQuickSort(resultList, start, partition - 1);
+				mapQuickSort(resultList, partition + 1, end);
+			}	
+		}
+		
+		/*
+		 * 获得快排的划分位置
+		 */
+		public static int partition(ArrayList<Entry<String, Integer>> resultList,int start, int end){
+			int partitionElem = getEntryValue(resultList, start);
+		
+			int i = start;
+			for(int j = start + 1; j <= end; j++){
+				int loopElem = getEntryValue(resultList, j);
+				if(loopElem > partitionElem){
+					i++;
+					exchangeElem(resultList, i, j);
+				}
+			}
+			exchangeElem(resultList, start, i);
+			
+			return i;
+		}
+		/*
+		 * 交换list中的两个元素
+		 */
+		public static void exchangeElem(ArrayList<Entry<String, Integer>> resultList, int index1, int index2){
+			Entry<String, Integer> temp = resultList.get(index1);
+			resultList.set(index1, resultList.get(index2));
+			resultList.set(index2, temp);
+		}
+		
+		public static int getEntryValue(ArrayList<Entry<String, Integer>> resultList, int index){
+			Entry<String, Integer> entry = resultList.get(index);
+			return entry.getValue();
 		}
 		
 		public void showSlowMethod(ArrayList<Entry<String, Integer>> resultList) {
@@ -179,37 +222,12 @@ public class StackTraceUtil_Statictis {
 				System.out.println("the slow position is:");
 
 				for(Map.Entry<String, Integer> elem : resultList){
-					System.out.println(elem.getKey() + "  总耗时约为: " + elem.getValue()*30 + "毫秒");
+					System.out.println(elem.getKey() + "  总耗时约为: " + elem.getValue()*30 + "ms");
 				}
 	
 				System.out.println("\n\n");
 			}
-		}
-		
-		/*
-		 * 获得性能差的方法，并增加行号信息 
-		public static Set<String> getCurrentResult(Set<String> preElems, Set<String> currentElems){
-			HashSet<String> tempResult = new HashSet<String>();
-			
-			for(String preElem : preElems){
-				for(String currentElem : currentElems){
-					String currentMethodPart = currentElem.substring(0,currentElem.lastIndexOf("#")); 
-					String preMethodPart = preElem.substring(0, preElem.lastIndexOf("#"));
-					
-					if(preMethodPart.equals(currentMethodPart)){
-						String preElemLine = preElem.substring(preElem.lastIndexOf("#") + 1);
-						String currentElemLine = currentElem.substring(currentElem.lastIndexOf("#") + 1);
-						
-						if(! preElemLine.equals(currentElemLine)){
-							preElem = preElem + "," + currentElemLine;
-						}
-						tempResult.add(preElem);
-					}
-				}
-			}
-			return tempResult;
-		}*/
-		
+		}		
 	}
 }
 
