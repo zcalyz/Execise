@@ -1,19 +1,13 @@
 package com.stackTrace;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.ListIterator;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
-import java.util.Map.Entry;
 
 public class StackTraceUtil_Statictis {
 	private static final int PERIOD = 30;
@@ -28,7 +22,6 @@ public class StackTraceUtil_Statictis {
 	
 	private static Set<String> currentResultSet = new HashSet<String>();
 	
-//	private static Set<String> result = new HashSet<String>();
 	private static Map<String, Integer> resultMap = new HashMap<String, Integer>();
 	
 	private static Set<String> ignoreSet = new HashSet<String>();
@@ -61,18 +54,20 @@ public class StackTraceUtil_Statictis {
 	}
 		
 	public static void executeTimerTask(){
-		new Thread(new Runnable() {		
-			@Override
-			public void run() {
-
-				Timer timer = new Timer();
-				timer.schedule(new StactTraceTimeTask(), DELAY , PERIOD);
-			}
-		}).start();
+		Timer timer = new Timer();
+		timer.schedule(new StactTraceTimeTask(timer), DELAY , PERIOD);
 		
 	}
 	
-	private static class StactTraceTimeTask extends TimerTask{		
+	private static class StactTraceTimeTask extends TimerTask{
+		
+		private Timer timer;
+		
+		public StactTraceTimeTask(Timer timer) {
+			// TODO Auto-generated constructor stub
+			this.timer = timer;
+		}
+		
 		@Override
 		public void run() {
 			
@@ -100,6 +95,8 @@ public class StackTraceUtil_Statictis {
 					showSlowMethod(resultList);
 					resultMap.clear();
 					count = 0;
+					/*timer.cancel();
+					timer.purge();*/
 				}
 			}	
 		}
@@ -114,30 +111,32 @@ public class StackTraceUtil_Statictis {
 				String threadName = thread.getName();
 				
 				for(int i = 0; i < stackTraceElems.length; i++){
-					String methodIdentifier = stackTraceElems[i].getClassName() + "." + stackTraceElems[i].getMethodName();
+					StringBuilder methodIdentifier = new StringBuilder(stackTraceElems[i].getClassName() + "." + stackTraceElems[i].getMethodName());
 					
-					if(!isIgnoreMethod(methodIdentifier) && stackTraceElems[i].getLineNumber() > 0){
+					if(!isIgnoreMethod(methodIdentifier.toString()) && stackTraceElems[i].getLineNumber() > 0){
 						//增加调用关系
 						methodIdentifier = addCallRelation(methodIdentifier, i, stackTraceElems);
 						//增加行信息test
 //						methodIdentifier = methodIdentifier + "#" + stackTraceElems[i].getLineNumber();
 						
 						//增加线程信息，字符串格式:  ThreadName:ClassName.MethodName
-						methodIdentifier = threadName + ":" + methodIdentifier;
+						methodIdentifier.insert(0, ":").insert(0, threadName);
+//						methodIdentifier = threadName + ":" + methodIdentifier;
 						
-						methodIdentifierSet.add(methodIdentifier);
+						methodIdentifierSet.add(methodIdentifier.toString());
 					}
 				}
 			}
 			return methodIdentifierSet;
 		}
 	
-		public static String addCallRelation(String methodIdentifier,
+		public static StringBuilder addCallRelation(StringBuilder methodIdentifier,
 				int position, StackTraceElement[] elements) {
 
 			for (int i = position + 1; i < elements.length; i++) {
-				methodIdentifier = elements[i].getClassName() + "."
-						+ elements[i].getMethodName() + "->" + methodIdentifier;
+				methodIdentifier.insert(0, "->")
+						.insert(0, elements[i].getMethodName()).insert(0, ".")
+						.insert(0, elements[i].getClassName());
 			}
 			return methodIdentifier;
 		}
@@ -147,9 +146,9 @@ public class StackTraceUtil_Statictis {
 		public static void addToResultMap(Set<String> currentResultSet){
 			
 			for(String methodIdentifier : currentResultSet){
-				//移除线程信息，统计所有线程调用该方法的总耗时
+				//移除线程信息
 				methodIdentifier = methodIdentifier.substring(methodIdentifier.indexOf(":") + 1);
-				
+				//统计所有线程调用该方法的总耗时
 				Integer value = resultMap.get(methodIdentifier);
 				if(value != null){
 					resultMap.put(methodIdentifier, ++value);
@@ -162,16 +161,6 @@ public class StackTraceUtil_Statictis {
 		
 		public static ArrayList<Entry<String, Integer>> sortByValue(){
 			ArrayList<Entry<String, Integer>> resultList = new ArrayList<Map.Entry<String, Integer>>(resultMap.entrySet());		
-			/*Collections.sort(resultList, new Comparator<Map.Entry<String, Integer>>() {
-
-				@Override
-				public int compare(Entry<String, Integer> o1,
-						Entry<String, Integer> o2) {
-					// 按降序排序
-					return (o2.getValue() - o1.getValue());
-				}
-				
-			});		*/
 			mapQuickSort(resultList, 0, resultList.size() - 1);
 			return resultList;
 		}
@@ -194,8 +183,7 @@ public class StackTraceUtil_Statictis {
 			for(int j = start + 1; j <= end; j++){
 				int loopElem = getEntryValue(resultList, j);
 				if(loopElem > partitionElem){
-					i++;
-					exchangeElem(resultList, i, j);
+					exchangeElem(resultList, ++i, j);
 				}
 			}
 			exchangeElem(resultList, start, i);
