@@ -1,27 +1,25 @@
 package com.stackTrace.v2;
 
-/**
- * 
- * @author Chenzhai
- *
- */
 public class StackTraceMessage {
-	public String transactionId;
+	protected String transactionId;
 	
-	public String callRelation;
+	protected String callRelation;
 	
-	public long time;
+	protected String agentId;
+	
+	protected long interval;
+	
+	protected String timestamp;
 	
 	public StackTraceMessage() {
-		// TODO Auto-generated constructor stub
 	}
 
-	public StackTraceMessage(String transactionId, String callRelation,
-			long time) {
-		super();
+	public StackTraceMessage(String transactionId, String callRelation, String agentId, long interval, long timestamp) {
 		this.transactionId = transactionId;
 		this.callRelation = callRelation;
-		this.time = time;
+		this.agentId = agentId;
+		this.interval = interval;
+		this.timestamp = DateUtil.getDateAndTimeStr(timestamp);
 	}
 
 	public String getTransactionId() {
@@ -38,16 +36,30 @@ public class StackTraceMessage {
 
 	public void setCallRelation(String callRelation) {
 		this.callRelation = callRelation;
+		
 	}
 
-	public long getTime() {
-		return time;
+	public long getInterval() {
+		return interval;
 	}
 
-	public void setTime(long time) {
-		this.time = time;
+	public void setInterval(long interval) {
+		this.interval = interval;
 	}
-	
-	
-	
+
+	public String getTimestamp() {
+		return timestamp;
+	}
+
+	public void setTimestamp(long timeStamp) {
+		this.timestamp = DateUtil.getDateAndTimeStr(timeStamp);
+	}
+
+	public String getAgentId() {
+		return agentId;
+	}
+
+	public void setAgentId(String agentId) {
+		this.agentId = agentId;
+	}
 }

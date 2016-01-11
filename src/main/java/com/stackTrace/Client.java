@@ -16,8 +16,8 @@ public class Client {
 				@Override
 				public void run() {
 					// TODO Auto-generated method stub
-					Demo1 demo1 = new Demo1();
-					demo1.callMethod();
+/*//					Demo1 demo1 = new Demo1();
+					demo1.callMethod();*/
 				}
 			});
 			
