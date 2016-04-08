@@ -6,36 +6,36 @@ import java.util.Map.Entry;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+@SuppressWarnings("unused")
 public class EnvUtil {
 	static String zookeeperUrl;
 
 	static String brokersUrl;
 
 	static {
-		// get all env
+		// get all environment variables
 		Map<String, String> envMap = System.getenv();
 		Set<Entry<String, String>> envSet = envMap.entrySet();
-
+		//get kafka env
 		String vcapEnv = null;
 		for (Entry<String, String> entry : envSet) {
 			if (entry.getKey().equals("VCAP_SERVICES")) {
 				vcapEnv = entry.getValue();
 			}
 		}
+		// set zookeeper url
+		String zookeeperUrl = getValueByKey(vcapEnv, "zookeeper");
+		// set kafka broker url
+		String brokers = getValueByKey(vcapEnv, "brokers");
+	}
 
-		Pattern zookeeperPattern = Pattern.compile("zookeeper\":\"(\\d+\\.\\d+\\.\\d+\\.\\d+:\\d+)\"");
-		Matcher matcher = zookeeperPattern.matcher(vcapEnv);
+	private static String getValueByKey(String jsonStr, String key) {
+		Pattern pattern = Pattern.compile(key + "\":\"(.*?)\"");
+		Matcher matcher = pattern.matcher(jsonStr);
 		if (matcher.find()) {
-			// set zookeeper url
-			String zookeeperUrl = matcher.group(1);
+			return matcher.group(1);
 		}
-
-		Pattern brokersPattern = Pattern.compile("brokers\":\"(\\d+\\.\\d+\\.\\d+\\.\\d+:\\d+)\"");
-		matcher = brokersPattern.matcher(vcapEnv);
-		if (matcher.find()) {
-			// set kafka broker url
-			String brokersUrl = matcher.group(1);
-		}
+		return null;
 	}
 
 	public static String getZookeeperUrl() {
